@@ -64,7 +64,7 @@ class ArticleController extends Controller
     /**
      * Search articles.
      */
-    public function search(Request $request)
+public function search(Request $request)
     {
         $query = $request->input('q');
 
@@ -72,22 +72,21 @@ class ArticleController extends Controller
             return response()->json([]);
         }
 
-        $articles = DB::select(
-            "SELECT * FROM articles WHERE title LIKE '%" . $query . "%'"
-        );
+        // --- CORRECTION SEC-002 : INJECTION SQL ---
+        
+        // MAUVAIS CODE (VULNÉRABLE) :
+        // $articles = \DB::select("SELECT * FROM articles WHERE title LIKE '%$query%' OR content LIKE '%$query%'");
 
-        $results = array_map(function ($article) {
-            return [
-                'id' => $article->id,
-                'title' => $article->title,
-                'content' => substr($article->content, 0, 200),
-                'published_at' => $article->published_at,
-            ];
-        }, $articles);
+        // BON CODE (SÉCURISÉ) :
+        // Utilisation d'Eloquent qui prépare la requête (Prepared Statements)
+        // Les paramètres sont échappés automatiquement par PDO.
+        $articles = Article::where('title', 'like', "%{$query}%")
+            ->orWhere('content', 'like', "%{$query}%")
+            ->with('user') // On garde les relations
+            ->get();
 
-        return response()->json($results);
+        return response()->json($articles);
     }
-
     /**
      * Store a newly created article.
      */
