@@ -76,10 +76,12 @@ function CommentList({ articleId }) {
                 position: 'relative'
               }}
             >
-              <div 
-                dangerouslySetInnerHTML={{ __html: comment.content }}
-                style={{ marginBottom: '0.5rem' }}
-              />
+                            {/* CORRECTION SEC-003 : Suppression de dangerouslySetInnerHTML */}
+              {/* Le contenu est maintenant affiché comme du texte brut. React va automatiquement */}
+              {/* échapper les balises script, empêchant l'exécution du code malveillant (XSS). */}
+              <div style={{ marginBottom: '0.5rem' }}>
+                {comment.content}
+              </div>
               
               <div style={{ fontSize: '0.85em', color: '#7f8c8d' }}>
                 — {comment.user?.name || 'Utilisateur'}
