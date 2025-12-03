@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Hash; // Pour hasher à l'inscription
+use Illuminate\Support\Facades\Auth; // Pour vérifier à la connexion
 
 class AuthController extends Controller
 {
@@ -18,24 +19,26 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        $user = User::where('email', $credentials['email'])->first();
+        // CORRECTION SEC-001 : Utilisation de Auth::attempt
+        // Cette méthode vérifie le hash de manière sécurisée.
+        // Plus de comparaison en clair ($user->password === $pwd) !
+        if (Auth::attempt($credentials)) {
+            $user = Auth::user();
 
-        if (!$user) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
+            // (Optionnel) Création de token si tu utilises Sanctum, 
+            // sinon on renvoie juste les infos comme avant.
+            
+            return response()->json([
+                'message' => 'Login successful',
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                ],
+            ]);
         }
 
-        if ($user->password !== $credentials['password']) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
-        }
-
-        return response()->json([
-            'message' => 'Login successful',
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-            ],
-        ]);
+        return response()->json(['message' => 'Invalid credentials'], 401);
     }
 
     /**
@@ -52,7 +55,8 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'password' => $validated['password'],
+            // CORRECTION SEC-001 : Hashage immédiat du mot de passe
+            'password' => Hash::make($validated['password']),
         ]);
 
         return response()->json([
@@ -70,6 +74,8 @@ class AuthController extends Controller
      */
     public function me(Request $request)
     {
+        // Note : Cette méthode n'est pas très sécurisée (IDOR), 
+        // mais on se concentre sur le mot de passe pour ce ticket.
         $userId = $request->input('user_id');
         
         if (!$userId) {
@@ -89,4 +95,3 @@ class AuthController extends Controller
         ]);
     }
 }
-

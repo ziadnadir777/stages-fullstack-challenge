@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash; // IMPERATIF : Import de la façade Hash
 use Carbon\Carbon;
 
 class DatabaseSeeder extends Seeder
@@ -19,21 +20,24 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Admin User',
                 'email' => 'admin@blog.com',
-                'password' => 'Admin123!',
+                // CORRECTION SEC-001 : Hashage du mot de passe admin
+                'password' => Hash::make('Admin123!'),
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
             [
                 'name' => 'John Doe',
                 'email' => 'john@blog.com',
-                'password' => 'Password123',
+                // CORRECTION SEC-001 : Hashage des autres utilisateurs
+                'password' => Hash::make('Password123'),
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
             [
                 'name' => 'Jane Smith',
                 'email' => 'jane@blog.com',
-                'password' => 'MySecret456',
+                // CORRECTION SEC-001 : Hashage des autres utilisateurs
+                'password' => Hash::make('MySecret456'),
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
