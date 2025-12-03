@@ -19,7 +19,12 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    // CORRECTION SEC-003 : On restreint l'accès uniquement au Frontend (port 3000)
+    // et au Backend (port 8000) pour éviter les appels depuis des sites malveillants.
+    'allowed_origins' => [
+        'http://localhost:3000',
+        'http://localhost:8000',
+    ],
 
     'allowed_origins_patterns' => [],
 
